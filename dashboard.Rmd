@@ -1,0 +1,102 @@
+---
+title: "Individual Household Electric Power Consumption"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library("readxl")
+library(sqldf)
+library(dplyr)
+library(tidyr)
+```
+
+```{r data}
+
+ca3=read_excel(file.choose())
+
+Categorical.Variables = c("Global_active_power","Global_reactive_power")
+
+Numeric.Variables = c("Voltage", "Global_intensity")
+
+```
+
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+ca3=read_excel(file.choose())
+
+ca3$Global_active_power[is.na(ca3$Global_active_power)] <- mean(ca3$Global_active_power, na.rm = T)
+ca3$Global_reactive_power[is.na(ca3$Global_reactive_power)] <- mean(ca3$Global_reactive_power, na.rm = T)
+ca3$Voltage[is.na(ca3$Voltage)] <- mean(ca3$Voltage, na.rm = T)
+ca3$Global_intensity[is.na(ca3$Global_intensity)] <- mean(ca3$Global_intensity, na.rm = T)
+ca3$Sub_metering_1[is.na(ca3$Sub_metering_1)] <- mean(ca3$Sub_metering_1, na.rm = T)
+ca3$Sub_metering_2[is.na(ca3$Sub_metering_2)] <- mean(ca3$Sub_metering_2, na.rm = T)
+ca3$Sub_metering_3[is.na(ca3$Sub_metering_3)] <- mean(ca3$Sub_metering_3, na.rm = T)
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+hist(ca3$Global_active_power,breaks=50,col = "red",
+     main = "Global_active_power",xlab = "Global_active_power",ylab = "Power")
+hist(ca3$Global_reactive_power,breaks=50,col = "blue",
+     main = "Global_reactive_power",xlab = "Global_reactive_power",ylab = "Power")
+hist(ca3$Voltage,breaks=50,col = "green",
+     main = "Voltage",xlab = "Voltage",ylab = "Power")
+hist(ca3$Global_intensity,breaks=50,col = "violet",
+     main = "Global_intensity",xlab = "Global_intensity",ylab = "Power")
+hist(ca3$Sub_metering_1,breaks=1,col = "orange",
+     main = "Sub_metering_1",xlab = "Sub_metering_1",ylab = "Power")
+hist(ca3$Sub_metering_2,breaks=50,col = "green",
+     main = "Sub_metering_2",xlab = "Sub_metering_2",ylab = "Power")
+hist(ca3$Sub_metering_3,breaks=50,col = "pink",
+     main = "Sub_metering_3",xlab = "Sub_metering_3",ylab = "Power")
+```
+
+### Chart C
+
+```{r}
+Global_active_power=as.numeric(sqldf("select COUNT(DISTINCT(Global_active_power)) from ca3 "))
+Global_reactive_power=as.numeric(sqldf("select COUNT(DISTINCT(Global_reactive_power)) from ca3"))
+Voltage=as.numeric(sqldf("select COUNT(DISTINCT(Voltage)) from ca3"))
+Global_intensity=as.numeric(sqldf("select COUNT(DISTINCT(Global_intensity)) from ca3"))
+print(Global_active_power)
+print(Global_reactive_power)
+print(Voltage)
+print(Global_intensity)
+```
+
+Column {data-width=300}
+-----------------------------------------------------------------------
+
+### Chart D
+
+```{r}
+plot(ca3$Global_active_power,ca3$Global_reactive_power,main = "scatterplot",xlab = "Global_active_power",ylab = "Global_reactive_power",col = "red")
+plot(ca3$Voltage,ca3$Global_intensity,main = "scatterplot",xlab = "Voltage",ylab = "Global_intensity",col = "green")
+plot(ca3$Sub_metering_2,ca3$Sub_metering_3,main = "scatterplot",xlab = "Sub_metering_2",ylab = "Sub_metering_3",col = "blue")
+
+```
+
+### Chart E
+
+```{r}
+plot(ca3$Global_active_power,col="red",ylim = c(0,300),type = "l")
+lines(ca3$Global_reactive_power,col="blue",ylim = c(0,300),type = "l")
+lines(ca3$Voltage,col="green",ylim = c(0,300),type = "l")
+legend(1,110,legend = c("Global_active_power","Global_reactive_power","Voltage"),
+       col=c("red","green","blue"),lty = 1:1)
+```
